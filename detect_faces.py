@@ -70,7 +70,7 @@ for i, face in enumerate(faces, start=1):
 # ----------------------------
 # Save JSON
 # ----------------------------
-with open("result.json", "w") as f:
+with open("result.json", "a") as f:
     json.dump(result, f, indent=4)
 
 print("result.json written successfully.")
