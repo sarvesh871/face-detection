@@ -2,30 +2,30 @@ import boto3
 import json
 import os
 from pathlib import Path
+import subprocess
 
 bucket = os.environ["S3_BUCKET"]
 region = os.environ["AWS_REGION"]
 
-# ----------------------------
-# Find the image that triggered this workflow
-# ----------------------------
-event_path = os.environ["GITHUB_EVENT_PATH"]
+# Find image changed in the latest commit
+result = subprocess.run(
+    ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
+    capture_output=True,
+    text=True,
+    check=True
+)
 
-with open(event_path, "r") as f:
-    event = json.load(f)
+changed_files = result.stdout.strip().splitlines()
 
 image_path = None
 
-for commit in event.get("commits", []):
-    for file in commit.get("added", []) + commit.get("modified", []):
-        if file.startswith("images/") and (
-            file.lower().endswith(".jpg")
-            or file.lower().endswith(".jpeg")
-        ):
-            image_path = file
+for file in changed_files:
+    if file.startswith("images/") and file.lower().endswith((".jpg", ".jpeg")):
+        image_path = file
+        break
 
 if image_path is None:
-    raise FileNotFoundError("No image found in this commit.")
+    raise FileNotFoundError("No JPEG image found in the latest commit.")
 
 image_name = Path(image_path).name
 
