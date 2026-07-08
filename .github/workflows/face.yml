@@ -40,6 +40,8 @@ jobs:
           ls -R
 
       - name: Run Face Detection
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
         run: python detect_faces.py
 
       - name: Display JSON Output
