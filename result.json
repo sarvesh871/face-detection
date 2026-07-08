@@ -27,4 +27,13 @@
             "Confidence": 98.62
         }
     ]
+}{
+    "Image": "employee.jpeg",
+    "NumberOfFaces": 1,
+    "Faces": [
+        {
+            "FaceNumber": 1,
+            "Confidence": 99.99
+        }
+    ]
 }
