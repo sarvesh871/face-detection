@@ -5,7 +5,7 @@ import os
 bucket = os.environ["S3_BUCKET"]
 region = os.environ["AWS_REGION"]
 
-image_path = "images/employee.jpg"
+image_path = "images/employee.jpeg"
 image_name = os.path.basename(image_path)
 
 # Upload to S3
