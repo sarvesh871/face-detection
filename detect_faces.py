@@ -7,21 +7,29 @@ bucket = os.environ["S3_BUCKET"]
 region = os.environ["AWS_REGION"]
 
 # ----------------------------
-# Find the newest JPEG image
+# Find the image that triggered this workflow
 # ----------------------------
-images_dir = Path("images")
+event_path = os.environ["GITHUB_EVENT_PATH"]
 
-image_files = list(images_dir.glob("*.jpeg")) + list(images_dir.glob("*.jpg"))
+with open(event_path, "r") as f:
+    event = json.load(f)
 
-if not image_files:
-    raise FileNotFoundError("No JPEG image found inside images folder.")
+image_path = None
 
-latest_image = max(image_files, key=lambda x: x.stat().st_mtime)
+for commit in event.get("commits", []):
+    for file in commit.get("added", []) + commit.get("modified", []):
+        if file.startswith("images/") and (
+            file.lower().endswith(".jpg")
+            or file.lower().endswith(".jpeg")
+        ):
+            image_path = file
 
-image_path = str(latest_image)
-image_name = latest_image.name
+if image_path is None:
+    raise FileNotFoundError("No image found in this commit.")
 
-print(f"Using image: {image_name}")
+image_name = Path(image_path).name
+
+print(f"Processing image: {image_name}")
 
 # ----------------------------
 # Upload to S3
@@ -70,7 +78,7 @@ for i, face in enumerate(faces, start=1):
 # ----------------------------
 # Save JSON
 # ----------------------------
-with open("result.json", "a") as f:
+with open("result.json", "w") as f:
     json.dump(result, f, indent=4)
 
 print("result.json written successfully.")
